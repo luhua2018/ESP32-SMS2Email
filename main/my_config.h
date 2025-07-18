@@ -8,4 +8,7 @@
 #ifndef MY_CONFIG_H
 #define MY_CONFIG_H
 
+#define CONFIG_ESP_WIFI_SSID     "myssid"
+#define CONFIG_ESP_WIFI_PASSWORD "mypassword"
+
 #endif // MY_CONFIG_H
