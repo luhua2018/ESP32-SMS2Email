@@ -30,6 +30,8 @@ Supported Targets : ESP32-C3
 
 #### 实现 Blink LED
 
+实现 Blink LED, 并按照 ESP-IDF 官方 API 的风格修改了 LED 初始化函数。
+
 #### 修改分区表
 
 1. Flash size 大小修改为4M.

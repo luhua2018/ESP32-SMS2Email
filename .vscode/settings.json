@@ -15,5 +15,6 @@
   },
   "idf.openOcdConfigs": [
     "board/esp32c3-builtin.cfg"
-  ]
+  ],
+  "workbench.colorTheme": "Atom One Dark"
 }
