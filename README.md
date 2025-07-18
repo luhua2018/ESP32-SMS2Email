@@ -10,6 +10,8 @@ Supported Targets : ESP32-C3
 
 如果调整项目文件结构或切换分支后编译遇到问题请尝试 `rm -r build/`, 因为 build 目录不被 Git 追踪。
 
+AIR780E 也可能需要更新固件，请参考[这篇文档](./assets/air780ex/readme.md)。
+
 ## ✅ TODO LIST
 
 - [ ] 模组 Flash 大小为 4M, 当前分区表只用了 2M, 后续需要适时调整。
