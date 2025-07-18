@@ -1,6 +1,3 @@
-/*
- * Blink Example
- */
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -8,11 +5,8 @@
 #include "esp_log.h"
 #include "sdkconfig.h"
 
-static const char *TAG = "example";
+static const char *TAG = "app_main";
 
-/* Use project configuration menu (idf.py menuconfig) to choose the GPIO to blink,
-   or you can edit the following line and set a number here.
-*/
 #define BLINK_GPIO CONFIG_BLINK_GPIO
 
 static uint8_t s_led_state = 0;
@@ -24,18 +18,23 @@ static void blink_led(void)
     s_led_state = !s_led_state;
 }
 
-static void configure_led(void)
+static esp_err_t configure_led(void)
 {
-    ESP_LOGI(TAG, "Example configured to blink GPIO LED!");
-    gpio_reset_pin(BLINK_GPIO);
-    /* Set the GPIO as a push/pull output */
-    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+    esp_err_t ret = gpio_reset_pin(BLINK_GPIO);
+    if (ret == ESP_OK)
+    {
+        ret = gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+    }
+    if (ret == ESP_OK)
+    {
+        ESP_LOGI(TAG, "Blink LED init done!");
+    }
+    return ret;
 }
 
 void app_main(void)
 {
-    /* Configure the peripheral according to the LED type */
-    configure_led();
+    ESP_ERROR_CHECK(configure_led());
 
     while (1)
     {
