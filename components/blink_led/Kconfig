@@ -1,0 +1,20 @@
+# 这个 menu 会出现在 "Component settings" 菜单下
+menu "Blink LED"
+
+    # 定义一个配置项，前缀 CONFIG_ 会被自动添加
+    # 在代码中通过 CONFIG_BLINK_GPIO 访问
+    config BLINK_GPIO
+        int "Blink GPIO number"
+        default 8
+        help
+            GPIO number (IOxx) to blink on and off the LED.
+            Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used to blink.
+
+    config BLINK_PERIOD
+        int "Blink period in ms"
+        range 10 3600000
+        default 1000
+        help
+            Define the blinking period in milliseconds.
+
+endmenu
