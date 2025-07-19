@@ -4,6 +4,12 @@ Branch : **main**
 
 Supported Targets : ESP32-C3
 
+## ⚠️ 项目声明 / Disclaimer
+
+本项目目前处于起步和开发阶段，主要用于个人学习和练手。功能和结构都还在不断调整完善，暂未达到生产或实际使用标准。如果您恰好浏览到本仓库，请不要对项目的可用性和完成度抱有过高期望，以免辜负您的期待。欢迎提出建议，但请知悉本项目尚不成熟。
+
+This project is at an early stage of development and is primarily intended for personal practice and learning. Features and structure are still under active adjustment and improvement, and the project is not ready for production or practical use. If you find this repository, please do not expect too much in terms of usability or completeness to avoid disappointment. Suggestions are welcome, but please be aware that the project is not yet mature.
+
 ## 💡 概述
 
 基于 ESP32C3 和 Air780E 的 SMS 转发到 Email 的项目。正在开发中。
