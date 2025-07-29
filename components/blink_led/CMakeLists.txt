@@ -10,7 +10,7 @@ idf_component_register(
 
     # PRIV_INCLUDE_DIRS: 私有头文件目录 (可选)
     # 如果你有一些只在组件内部使用的头文件，可以放在这里，这个路径只会添加到本组件的 include 搜索路径中
-    # PRIV_INCLUDE_DIRS "private_include"
+    PRIV_INCLUDE_DIRS  "../../main"
 
     # REQUIRES: 公共依赖
     # 如果你的公共头文件 (xxx.h) #include 了其他组件的头文件，那么必须在这里声明依赖。
@@ -18,5 +18,5 @@ idf_component_register(
 
     # PRIV_REQUIRES: 私有依赖
     # 如果你的源文件 (.c) 使用了其他组件，但公共头文件没有，就在这里声明。这有助于加快编译速度。
-    # PRIV_REQUIRES i2c log
+    PRIV_REQUIRES espressif__led_strip
 )

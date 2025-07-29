@@ -11,4 +11,8 @@
 #define CONFIG_ESP_WIFI_SSID     "myssid"
 #define CONFIG_ESP_WIFI_PASSWORD "mypassword"
 
+/* 宏开关，选用哪种LED */
+#define USE_GPIO_LED
+// #define USE_STRIP_LED
+
 #endif // MY_CONFIG_H

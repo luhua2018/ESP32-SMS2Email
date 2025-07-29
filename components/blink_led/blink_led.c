@@ -1,71 +1,120 @@
+/* Includes - User config ----------------------------------------------------------------------------- */
+#include "my_config.h"
+/* Includes - ESP APIs -------------------------------------------------------------------------------- */
+#include "esp_log.h"
+#include "esp_check.h"
+#include "sdkconfig.h"
+/* Includes - FreeRTOS APIs --------------------------------------------------------------------------- */
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "blink_led.h"
-#include "my_config.h"
-#include "esp_log.h"
+/* Includes - Driver APIs ----------------------------------------------------------------------------- */
 #include "driver/gpio.h"
-#if BLINK_LED_TYPE == USE_WS2812_LED
+/* Includes - Components APIs ------------------------------------------------------------------------- */
+#if defined(USE_STRIP_LED)
 #include "led_strip.h"
-static led_strip_handle_t led_strip = NULL;
+#include "led_strip_types.h"
+#endif
+/* Includes - User APIs ------------------------------------------------------------------------------- */
+#include "blink_led.h"
+
+/* Define Blink_LED config ---------------------------------------------------------------------------- */
+#define BLINK_GPIO CONFIG_BLINK_GPIO
+
+/* Static value ---------------------------------------------------------------------------------------- */
+static const char *TAG = "blink_led";
+#if defined(USE_STRIP_LED)
+static led_strip_handle_t led_strip;
 #endif
 
-#define BLINK_GPIO    MY_BLINK_GPIO
-#define BLINK_PERIOD  MY_BLINK_PERIOD
+/* Static function ------------------------------------------------------------------------------------- */
 
-static const char *TAG = "blink_led";
-
-esp_err_t configure_led(void)
+/**
+ * @brief 初始化Blink_LED
+ */
+static esp_err_t blink_led_init(void)
 {
-#if BLINK_LED_TYPE == USE_GPIO_LED
+    ESP_RETURN_ON_ERROR(gpio_reset_pin(BLINK_GPIO), TAG, "GPIO reset failed.");
+
+#if defined(USE_GPIO_LED)
     gpio_config_t io_conf = {
         .pin_bit_mask = 1ULL << BLINK_GPIO,
         .mode = GPIO_MODE_OUTPUT,
-        .pull_up_en = 0,
-        .pull_down_en = 0,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLUP_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
-    gpio_config(&io_conf);
+    ESP_RETURN_ON_ERROR(gpio_config(&io_conf), TAG, "GPIO config failed.");
     gpio_set_level(BLINK_GPIO, 0);
-    ESP_LOGI(TAG, "Configured GPIO LED");
-#elif BLINK_LED_TYPE == USE_WS2812_LED
+    ESP_LOGI(TAG, "Configured GPIO_LED succeed.");
+#elif defined(USE_STRIP_LED)
     led_strip_config_t strip_config = {
         .strip_gpio_num = BLINK_GPIO,
-        .max_leds = MY_WS2812_NUM,
+        .max_leds = 1, // at least one LED on board
     };
     led_strip_rmt_config_t rmt_config = {
-        .resolution_hz = 10 * 1000 * 1000,
+        .resolution_hz = 10 * 1000 * 1000, // 10MHz
         .flags.with_dma = false,
     };
-    ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
+    ESP_RETURN_ON_ERROR(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip), TAG, "Strip_LED config failed.");
     led_strip_clear(led_strip);
-    ESP_LOGI(TAG, "Configured WS2812 LED strip");
-#else
-    #error "Unsupported LED type"
+    ESP_LOGI(TAG, "Configured Strip_LED succeed.");
 #endif
+
     return ESP_OK;
 }
 
+/**
+ * @brief Blink_LED的任务函数
+ */
 void blink_led_task(void *pvParameter)
 {
-    while (1) {
-#if BLINK_LED_TYPE == USE_GPIO_LED
-        gpio_set_level(BLINK_GPIO, 1);
-        vTaskDelay(BLINK_PERIOD / portTICK_PERIOD_MS / 2);
-        gpio_set_level(BLINK_GPIO, 0);
-        vTaskDelay(BLINK_PERIOD / portTICK_PERIOD_MS / 2);
-#elif BLINK_LED_TYPE == USE_WS2812_LED
-        led_strip_set_pixel(led_strip, 0, 0, 0, 16);
-        led_strip_refresh(led_strip);
-        vTaskDelay(BLINK_PERIOD / portTICK_PERIOD_MS / 2);
+    static uint8_t s_led_state = 0;
 
-        led_strip_set_pixel(led_strip, 0, 0, 0, 0);
-        led_strip_refresh(led_strip);
-        vTaskDelay(BLINK_PERIOD / portTICK_PERIOD_MS / 2);
+    while (1)
+    {
+#if defined(USE_GPIO_LED)
+        gpio_set_level(BLINK_GPIO, s_led_state);
+#elif defined(USE_STRIP_LED)
+        if (s_led_state)
+        {
+            /* Set the LED pixel using RGB from 0 (0%) to 255 (100%) for each color */
+            led_strip_set_pixel(led_strip, 0, 16, 16, 16);
+            /* Refresh the strip to send data */
+            led_strip_refresh(led_strip);
+        }
+        else
+        {
+            /* Set all LED off to clear all pixels */
+            led_strip_clear(led_strip);
+        }
 #endif
+        s_led_state = !s_led_state;
+        vTaskDelay(pdMS_TO_TICKS(CONFIG_BLINK_PERIOD));
     }
 }
-void blink_led_start(void)
+
+/* Public function ------------------------------------------------------------------------------------- */
+
+/**
+ * @brief 启动Blink_LED
+ */
+esp_err_t blink_led_start(void)
 {
-    configure_led();
-    xTaskCreate(blink_led_task, "blink_led_task", 2048, NULL, 5, NULL);
+    esp_err_t ret = ESP_OK;
+
+    /* 初始化引脚 */
+    ESP_RETURN_ON_ERROR(blink_led_init(), TAG, "Blink_LED init failed.");
+
+    /* 创建闪烁任务 */
+    if (xTaskCreate(blink_led_task, "blink_led_task", 1024, NULL, 16, NULL) != pdPASS)
+    {
+        ESP_LOGE("TASK", "Failed to create task");
+        ret = ESP_FAIL;
+    }
+    else
+    {
+        ESP_LOGI(TAG, "Blink LED startup success!");
+    }
+
+    return ret;
 }
