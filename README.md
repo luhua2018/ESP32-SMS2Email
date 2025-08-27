@@ -35,6 +35,14 @@ AIR780E 也可能需要更新固件，请参考[这篇文档](./assets/air780ex/
 
 ## 📅 更新记录
 
+### 📝 2025/08/27
+
+#### 添加获取 NTP 时间戳的功能
+
+1. NTP 服务器可配置，支持三个，通过 Kconfig (components/time_manager/Kconfig).
+2. Maximum number of NTP servers (CONFIG_LWIP_SNTP_MAX_SERVERS) 配置保持默认(1).
+3. 手动实现轮询查询，效果更好(默认只有当第一个服务器DNS解析失败时才会使用第二个服务器，条件很苛刻)。
+
 ### 📝 2025/08/22
 
 #### 修改ESP-IDF环境配置

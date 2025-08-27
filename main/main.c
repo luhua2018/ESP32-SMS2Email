@@ -8,6 +8,7 @@
 
 /* Includes - User APIs ------------------------------------------------------------------------------- */
 #include "blink_led.h"
+#include "ntp_client.h"
 
 /* Function declaration ------------------------------------------------------------------------------- */
 void tmp_station_start(void);
@@ -24,6 +25,13 @@ void app_main(void)
     ESP_LOGW(TAG, "Heap: %u/%u", heap_caps_get_free_size(MALLOC_CAP_DEFAULT), heap_caps_get_total_size(MALLOC_CAP_DEFAULT));
 
     tmp_station_start();
+    ntp_client_init(NULL);
+
+    time_t now;
+    if(ntp_client_get_timestamp(&now) == NTP_CLIENT_OK)
+    {
+        ESP_LOGI(TAG, "NTP time: %s", ctime(&now));
+    }
 
     while (1)
     {

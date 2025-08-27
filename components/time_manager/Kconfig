@@ -1,0 +1,35 @@
+menu "Time Manager - NTP Client"
+
+    config NTP_CLIENT_PRIMARY_SERVER
+        string "Primary NTP Server"
+        default "ntp1.aliyun.com"
+        help
+            Primary NTP server hostname or IP address for time synchronization.
+
+    config NTP_CLIENT_SECONDARY_SERVER
+        string "Secondary NTP Server"
+        default "ntp.sjtu.edu.cn"
+        help
+            Secondary NTP server hostname or IP address for backup.
+
+    config NTP_CLIENT_TERTIARY_SERVER
+        string "Tertiary NTP Server"
+        default "cn.pool.ntp.org"
+        help
+            Tertiary NTP server hostname or IP address for additional backup.
+
+    config NTP_CLIENT_SYNC_TIMEOUT_MS
+        int "NTP Sync Timeout (ms)"
+        range 1000 60000
+        default 10000
+        help
+            Maximum time to wait for NTP synchronization in milliseconds.
+
+    config NTP_CLIENT_RETRY_COUNT
+        int "Maximum Retry Count"
+        range 1 20
+        default 5
+        help
+            Maximum number of retry attempts for NTP synchronization.
+
+endmenu
