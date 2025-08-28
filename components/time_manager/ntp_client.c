@@ -1,6 +1,7 @@
 /*
  * NTP客户端组件 - 仅支持IPv4网络时间获取
- * 基于 ESP-IDF SNTP 示例修改，移除IPv6、系统时间同步等功能
+ * 通过网络获取 NTP 服务器的时间
+ * 基于 ESP-IDF SNTP 示例修改
  * 原始来源: https://github.com/espressif/esp-idf/blob/47a659cd3ee5f73a253d2a7af02781a73a44356d/examples/protocols/sntp/main/sntp_example_main.c
  */
 
@@ -75,13 +76,13 @@ static bool ntp_client_is_network_connected(void)
 }
 
 /**
- * @brief 配置NTP服务器（仅IPv4）并实现轮询机制
+ * @brief 配置NTP服务器
  * @return NTP_CLIENT_OK 成功，其他值为错误码
  */
 static int ntp_client_configure_servers(void)
 {
-    // 使用单服务器配置，手动实现轮询
-    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG(CONFIG_NTP_CLIENT_PRIMARY_SERVER);
+    /* 仅初始化SNTP服务，不预设任何服务器，服务器配置在 get_timestamp 中动态设置 */
+    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("temp.server");
     config.sync_cb = ntp_client_sync_notification_cb;
     config.smooth_sync = false;
     
@@ -91,10 +92,7 @@ static int ntp_client_configure_servers(void)
         return NTP_CLIENT_ERR_SYNC_FAILED;
     }
     
-    // 手动添加备用服务器
-    esp_sntp_setservername(1, CONFIG_NTP_CLIENT_SECONDARY_SERVER);
-    esp_sntp_setservername(2, CONFIG_NTP_CLIENT_TERTIARY_SERVER);
-    
+    /* 服务器配置在 get_timestamp 中动态设置 */
     return NTP_CLIENT_OK;
 }
 
@@ -256,4 +254,3 @@ int ntp_client_get_timestamp(time_t* timestamp)
     
     return NTP_CLIENT_OK;
 }
-

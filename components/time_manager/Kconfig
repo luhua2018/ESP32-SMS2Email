@@ -18,10 +18,11 @@ menu "Time Manager - NTP Client"
         help
             Tertiary NTP server hostname or IP address for additional backup.
 
+    # 超时时间。由于设定了轮询3个NTP服务器，每个服务器可以重试5次，所以最大会重试15次，每次分摊1/15的超时时间。
     config NTP_CLIENT_SYNC_TIMEOUT_MS
         int "NTP Sync Timeout (ms)"
         range 1000 60000
-        default 10000
+        default 30000
         help
             Maximum time to wait for NTP synchronization in milliseconds.
 
